@@ -50,16 +50,7 @@ public class GameLogic {
 		int i;
 		for (i = 0; i < winningPatterns.length; i++) {
 			
-			System.out.println("checking pattern " + Arrays.toString(winningPatterns[i]));
-			
 			boolean contains = IntStream.of(winningPatterns[i]).anyMatch(x -> x == position);
-			
-			int t;
-			for(t = 0; t < winningPatterns[i].length; t++) {
-				System.out.println("value at position " + winningPatterns[i][t] + "-" + moveUtil.getSymbolInPosition(game, winningPatterns[i][t]));
-			}
-			
-			System.out.println("contains " + contains);
 			
 			if(contains) {
 				if(checkWinningPattern(position, winningPatterns[i])) {

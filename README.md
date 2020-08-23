@@ -4,6 +4,13 @@ Play Tic Tac Toe Using REST
 
 To play you will need to registed and login first.
 
+Build: mvn clean install
+Run on docker
+1. Run: docker build ./ -t tictactoeapp
+2. Run: docker-compose up
+
+Database schema in src/main/resources/schema.sql
+
 Register (POST)
 URL: http://localhost:8080/player/http://localhost:8080/player/register
 Example request to register: 
