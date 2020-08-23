@@ -12,22 +12,26 @@ Run on docker
 
 Database schema in src/main/resources/schema.sql
 
+-------------------------------------------------------------------------
+
 Register (POST)
 
 URL: http://localhost:8080/player/http://localhost:8080/player/register
 
-Example request to register: 
+Example request:
 
 {
 	"username": "user",
 	"password": "pass"
 }
 
+-------------------------------------------------------------------------
+
 Login (POST)
 
 URL: http://localhost:8080/player/http://localhost:8080/player/login
 
-Example request to login: 
+Example request:
 
 {
 	"username": "user",
@@ -40,13 +44,19 @@ Example request header:
 
 Authorization: Bearer %JWTTOKENFROMLOGIN%
 
+-------------------------------------------------------------------------
+
 Get all open games (GET)
 
 URL: http://localhost:8080/game/opengames
 
+-------------------------------------------------------------------------
+
 Get all games (GET)
 
 URL: http://localhost:8080/game/allgames
+
+-------------------------------------------------------------------------
 
 Start a new game (POST)
 
@@ -54,21 +64,25 @@ URL: http://localhost:8080/game/start
 
 Empty request sufficient
 
+-------------------------------------------------------------------------
+
 Join a game (POST)
 
 URL: http://localhost:8080/player/http://localhost:8080/player/login
 
-Example request to login: 
+Example request: 
 
 {
 	"gameId": 43
 }
 
+-------------------------------------------------------------------------
+
 Make a move (POST)
 
 URL: http://localhost:8080/player/http://localhost:8080/player/login
 
-Example request to login: 
+Example request: 
 
 {
 	"gameId": 43,
