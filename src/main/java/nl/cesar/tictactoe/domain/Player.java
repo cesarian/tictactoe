@@ -1,21 +1,22 @@
 package nl.cesar.tictactoe.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "player")
 public class Player {
 	
 	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO)
-	private Integer id;
-	private String username;	
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private Long id;
+	private String username;
 	private String password;
 	
+	public Player(String username, String password) {
+		this.username = username;
+		this.password = password;
+	}
+
 	public String getUsername() {
 		return username;
 	}
@@ -24,7 +25,7 @@ public class Player {
 		return password;
 	}
 	
-	public Integer getId() {
+	public Long getId() {
 		return id;
 	}
 	
@@ -35,10 +36,6 @@ public class Player {
 	public void setPassword(String password) {
 		this.password = password;
 		
-	}
-	
-	public void setId(Integer id) {
-		this.id = id;
 	}
 
 }

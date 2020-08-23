@@ -1,0 +1,26 @@
+version: "3.8"
+services:
+  dbpostgresql:
+    image: postgres:latest
+    network_mode: bridge
+    container_name: tictactoepostgres
+    volumes:
+      - postgres-data:/var/lib/postgressql/data
+    ports:
+      - 5432:5432
+    environment:
+         - POSTGRES_PASSWORD=p4ssword
+         - POSTGRES_USER=tictactoe
+         - POSTGRES_DB=postgres
+  tictactoeapp:
+    image: tictactoeapp:latest
+    network_mode: bridge
+    container_name: tictactoeapp
+    ports:
+      - 8080:8080
+    depends_on:
+      - dbpostgresql
+    links:
+      - dbpostgresql
+volumes:
+  postgres-data:

@@ -1,9 +1,9 @@
-package nl.cesar.tictactoe.data.transfer.model;
+package nl.cesar.tictactoe.data.transfer.model.request;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-public class PlayerDataTranferModel {
+public class AuthenticationRequestModel {
 	@NotNull
 	@NotEmpty
 	private String username;

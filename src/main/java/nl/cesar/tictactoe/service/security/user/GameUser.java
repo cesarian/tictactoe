@@ -24,8 +24,13 @@ public class GameUser extends User{
         this.player = player;
 	}
 
-	public Integer getUserId() {
+	public Long getUserId() {
 		return player.getId();
 	}
+	
+	public String getUsername() {
+		return player.getUsername();
+	}
+
 
 }
