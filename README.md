@@ -77,3 +77,13 @@ Example request to login:
 }
 
 Symbol is "x" for the game owner/starter (player 1) and "o" for the player that joined the game (player 2)
+
+Position
+
+Ther are 1 to 9 positions. Put a symbol in one of the positions. Position chema:
+
+1 2 3
+
+4 5 6
+
+7 8 9
