@@ -16,7 +16,7 @@ Database schema in src/main/resources/schema.sql
 
 Register (POST)
 
-URL: http://localhost:8080/player/http://localhost:8080/player/register
+URL: http://localhost:8080/player/register
 
 Example request:
 
@@ -29,7 +29,7 @@ Example request:
 
 Login (POST)
 
-URL: http://localhost:8080/player/http://localhost:8080/player/login
+URL: http://localhost:8080/player/login
 
 Example request:
 
@@ -68,7 +68,7 @@ Empty request sufficient
 
 Join a game (POST)
 
-URL: http://localhost:8080/player/http://localhost:8080/player/login
+URL: http://localhost:8080/game/join
 
 Example request: 
 
@@ -80,7 +80,7 @@ Example request:
 
 Make a move (POST)
 
-URL: http://localhost:8080/player/http://localhost:8080/player/login
+URL: http://localhost:8080/game/move
 
 Example request: 
 
