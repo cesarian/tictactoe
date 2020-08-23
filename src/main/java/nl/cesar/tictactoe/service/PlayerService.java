@@ -1,7 +1,6 @@
 package nl.cesar.tictactoe.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +16,8 @@ public class PlayerService {
 	@Autowired
 	private PlayerRepository playerRepository;
 	
-	private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	public Player register(AuthenticationRequestModel authenticationRequestModel) throws Exception {
 		Player player = new Player(authenticationRequestModel.getUsername(), passwordEncoder.encode(authenticationRequestModel.getPassword()));

@@ -13,4 +13,5 @@ import nl.cesar.tictactoe.util.GameState;
 public interface GameRepository extends CrudRepository<Game, Long>{
 	Optional<Game> findById(Long id);
 	List<Game> findByGameState(GameState gameState);
+	List<Game> findAll();
 }

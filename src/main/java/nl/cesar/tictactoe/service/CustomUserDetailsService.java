@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,11 +29,14 @@ public class CustomUserDetailsService implements UserDetailsService {
 		player.orElseThrow(() -> new UsernameNotFoundException("User not found: " + userName));
 		
 		Set<GrantedAuthority> authorities = new HashSet<>();
-		authorities.add(new SimpleGrantedAuthority("create"));
-		
 		Set<GrantedAuthority> unmodifiableSet = Collections.unmodifiableSet(authorities);
 		
 		return new GameUser(player.get(), unmodifiableSet);
+	}
+	
+	public UserDetails getLoggedInUser() {
+		UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		return userDetails;
 	}
 
 }

@@ -9,7 +9,6 @@ import nl.cesar.tictactoe.domain.Player;
 
 @Repository
 public interface PlayerRepository extends CrudRepository<Player, Long>{
-
 	Optional<Player> findByUsername(String userName);
 	Optional<Player> findById(Long id);
 

@@ -1,15 +1,9 @@
 package nl.cesar.tictactoe.data.transfer.model.request;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
 public class AuthenticationRequestModel {
-	@NotNull
-	@NotEmpty
+
 	private String username;
 	
-	@NotNull
-	@NotEmpty
 	private String password;
 	
 	public String getUsername() {

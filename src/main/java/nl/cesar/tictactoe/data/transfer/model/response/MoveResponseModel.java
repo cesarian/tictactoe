@@ -1,15 +1,25 @@
 package nl.cesar.tictactoe.data.transfer.model.response;
 
 import nl.cesar.tictactoe.data.transfer.model.ResponseModel;
+import nl.cesar.tictactoe.util.GameState;
 
 public class MoveResponseModel extends ResponseModel {
-	private Boolean winningMove;
+	private GameState gameState;
+	private Long winnerId;
 
-	public Boolean getWinningMove() {
-		return winningMove;
+	public GameState getGameState() {
+		return gameState;
 	}
 
-	public void setWinningMove(Boolean winningMove) {
-		this.winningMove = winningMove;
+	public void setGameState(GameState gameState) {
+		this.gameState = gameState;
+	}
+
+	public Long getWinnerId() {
+		return winnerId;
+	}
+
+	public void setWinnerId(Long winnerId) {
+		this.winnerId = winnerId;
 	}
 }

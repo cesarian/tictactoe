@@ -1,15 +1,15 @@
 package nl.cesar.tictactoe.data.transfer.model.request;
 
 public class MoveRequestModel {
-	private String symbol;
+	private Character symbol;
 	private Integer position;
 	private Long gameId;
 	
-	public String getSymbol() {
+	public Character getSymbol() {
 		return symbol;
 	}
 	
-	public void setSymbol(String symbol) {
+	public void setSymbol(Character symbol) {
 		this.symbol = symbol;
 	}
 	
@@ -28,6 +28,5 @@ public class MoveRequestModel {
 	public void setGameId(Long gameId) {
 		this.gameId = gameId;
 	}
-	
 	
 }

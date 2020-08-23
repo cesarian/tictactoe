@@ -1,13 +1,17 @@
 package nl.cesar.tictactoe.domain;
 
-import javax.persistence.Embedded;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 import nl.cesar.tictactoe.util.GameState;
+import nl.cesar.tictactoe.util.GameType;
+import nl.cesar.tictactoe.util.GameDataConverter;
 
 @Entity
 @Table(name = "game")
@@ -18,42 +22,48 @@ public class Game {
 	private Long id;
 	private Long player1Id;
 	private Long player2Id;
-	private String type;
-	private GameState state;
-	private String winner;
-	private Long player1Score;
-	private Long player2Score;
-	@Embedded
+	@Enumerated(EnumType.STRING)
+	private GameType gameType;
+	@Enumerated(EnumType.STRING)
+	private GameState gameState;
+	private Long winnerId;
+	private Long playerTurn;
+	@Convert(converter = GameDataConverter.class)
 	private GameData gameData;
+	
+	public Game() {
+		
+	}
 	
 	public Game(Long player1Id) {
 		this.player1Id = player1Id;
-		this.state = GameState.OPEN;
+		this.gameState = GameState.OPEN;
 		this.gameData = new GameData();
+		this.playerTurn = player1Id;
 	}
 
-	public String getType() {
-		return type;
+	public GameType getType() {
+		return gameType;
 	}
 	
-	public void setType(String type) {
-		this.type = type;
+	public void setType(GameType type) {
+		this.gameType = type;
 	}
 	
-	public GameState getState() {
-		return state;
+	public GameState getGameState() {
+		return gameState;
 	}
 	
-	public void setState(GameState state) {
-		this.state = state;
+	public void setGameState(GameState gameState) {
+		this.gameState = gameState;
 	}
 	
-	public String getWinner() {
-		return winner;
+	public Long getWinnerId() {
+		return winnerId;
 	}
 	
-	public void setWinner(String winner) {
-		this.winner = winner;
+	public void setWinnerId(Long winnerId) {
+		this.winnerId = winnerId;
 	}
 	
 	public Long getId() {
@@ -75,22 +85,6 @@ public class Game {
 	public void setPlayer2Id(Long player2Id) {
 		this.player2Id = player2Id;
 	}
-	
-	public Long getPlayer1Score() {
-		return player1Score;
-	}
-
-	public void setPlayer1Score(Long player1Score) {
-		this.player1Score = player1Score;
-	}
-
-	public Long getPlayer2Score() {
-		return player2Score;
-	}
-
-	public void setPlayer2Score(Long player2Score) {
-		this.player2Score = player2Score;
-	}
 
 	public GameData getGameData() {
 		return gameData;
@@ -98,6 +92,14 @@ public class Game {
 
 	public void setGameData(GameData gameData) {
 		this.gameData = gameData;
+	}
+
+	public Long getPlayerTurn() {
+		return playerTurn;
+	}
+
+	public void setPlayerTurn(Long playerTurn) {
+		this.playerTurn = playerTurn;
 	}
 
 }

@@ -19,6 +19,7 @@ import nl.cesar.tictactoe.domain.Player;
 import nl.cesar.tictactoe.service.CustomUserDetailsService;
 import nl.cesar.tictactoe.service.PlayerService;
 import nl.cesar.tictactoe.service.security.user.GameUser;
+import nl.cesar.tictactoe.util.JwtUtil;
 
 @Controller
 @RequestMapping(path = "/player")
@@ -28,6 +29,9 @@ public class PlayerController {
 	
 	@Autowired
 	private AuthenticationManager authenticationManager;
+	
+	@Autowired
+	private JwtUtil jwtTokenUtil;
 	
 	@Autowired
 	private CustomUserDetailsService customUserDetailsService;
@@ -41,6 +45,7 @@ public class PlayerController {
     public ResponseEntity<?> register(@RequestBody AuthenticationRequestModel playerDataModel) {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		RegisterResponseModel response = new RegisterResponseModel();
+		response.setActionSuccessful(false);
 		
 		try {
 			Player player = playerService.register(playerDataModel);
@@ -52,7 +57,6 @@ public class PlayerController {
 	        return new ResponseEntity<>(response, responseHeaders, HttpStatus.OK);
 		}
 		catch(Exception e) {
-			response.setActionSuccessful(false);
         	response.setMessage("Something went wrong. Please try again or use another username.");
 			
 			return new ResponseEntity<>(response, responseHeaders, HttpStatus.OK);
@@ -67,22 +71,24 @@ public class PlayerController {
 		);
 		
 		LoginResponseModel response = new LoginResponseModel();
+		response.setActionSuccessful(false);
 		
 		try {
 			
-			final GameUser gameUser = (GameUser) customUserDetailsService
+			GameUser gameUser = (GameUser) customUserDetailsService
 					.loadUserByUsername(playerDataModel.getUsername());
 			
+			String jwt = jwtTokenUtil.generateToken(gameUser);
+			
+			response.setJwt(jwt);
 			response.setUserId(gameUser.getUserId());
 			response.setUsername(gameUser.getUsername());
 			response.setActionSuccessful(true);
 			response.setMessage("Success");
 			
 		} catch (UsernameNotFoundException e) {
-			response.setActionSuccessful(false);
 			response.setMessage("Login failed.".concat(e.getMessage()));
 		} catch (Exception e) {
-			response.setActionSuccessful(false);
 			response.setMessage("Login failed. Please try again");
 		}
 

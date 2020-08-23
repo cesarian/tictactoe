@@ -1,12 +1,22 @@
 package nl.cesar.tictactoe.data.transfer.model.response;
 
 import nl.cesar.tictactoe.data.transfer.model.ResponseModel;
+import nl.cesar.tictactoe.util.GameState;
 
 public class GameJoinResponseModel extends ResponseModel{
 	
 	private Long gameId;
 	private Character player1Symbol;
 	private Character player2Symbol;
+	private GameState gameState;
+
+	public GameState getGameState() {
+		return gameState;
+	}
+
+	public void setGameState(GameState gameState) {
+		this.gameState = gameState;
+	}
 
 	public Long getGameId() {
 		return gameId;
