@@ -1,4 +1,4 @@
-e# Tic-Tac-Toe
+# Tic-Tac-Toe
 
 Play Tic Tac Toe Using REST
 
