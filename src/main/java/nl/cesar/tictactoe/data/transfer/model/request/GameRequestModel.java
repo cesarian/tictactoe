@@ -1,6 +1,6 @@
 package nl.cesar.tictactoe.data.transfer.model.request;
 
-public class GameJoinRequestModel {
+public class GameRequestModel {
 	
 	private Long gameId;
 

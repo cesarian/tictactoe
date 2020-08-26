@@ -6,10 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import nl.cesar.tictactoe.data.transfer.model.request.GameJoinRequestModel;
+import nl.cesar.tictactoe.data.transfer.model.ResponseModel;
+import nl.cesar.tictactoe.data.transfer.model.request.GameRequestModel;
 import nl.cesar.tictactoe.data.transfer.model.request.MoveRequestModel;
 import nl.cesar.tictactoe.data.transfer.model.response.GameJoinResponseModel;
 import nl.cesar.tictactoe.data.transfer.model.response.GetGamesResponseModel;
@@ -37,7 +39,7 @@ public class GameController {
     }
     
     @RequestMapping(value = "/start", method = RequestMethod.POST)
-    public ResponseEntity<?> createNewGame() {
+    public ResponseEntity<?> startNewGame() {
     	HttpHeaders responseHeaders = new HttpHeaders();
 		StartGameResponseModel response = new StartGameResponseModel();
 		response.setActionSuccessful(false);
@@ -53,15 +55,17 @@ public class GameController {
 			response.setPlayer2Symbol(game.getGameData().getPlayer2Symbol());
 			response.setActionSuccessful(true);
 			response.setMessage("Success");
-		} catch (Exception e) {
-			response.setMessage("Failed to start a game. Please try again");
+		} catch (UsernameNotFoundException e) {
+			response.setMessage(e.getMessage());
+		} catch (GameException e) {
+			response.setMessage(e.getMessage());
 		}
         
         return new ResponseEntity<>(response, responseHeaders, HttpStatus.OK);
     }
     
     @RequestMapping(value = "/join", method = RequestMethod.POST)
-    public ResponseEntity<?> joinGame(@RequestBody GameJoinRequestModel gameJoinRequestModel) {
+    public ResponseEntity<?> joinGame(@RequestBody GameRequestModel gameRequestModel) {
     	HttpHeaders responseHeaders = new HttpHeaders();
     	GameJoinResponseModel response = new GameJoinResponseModel();
     	response.setActionSuccessful(false);
@@ -69,7 +73,7 @@ public class GameController {
     	String loggedInUser = customUserDetailsService.getLoggedInUser().getUsername();
     	
 		try {
-			Game game = gameService.joinGame(loggedInUser, gameJoinRequestModel);
+			Game game = gameService.joinGame(loggedInUser, gameRequestModel.getGameId());
 			
 			response.setGameId(game.getId());
 			response.setGameState(game.getGameState());
@@ -77,10 +81,32 @@ public class GameController {
 			response.setPlayer2Symbol(game.getGameData().getPlayer2Symbol());
 			response.setActionSuccessful(true);
 			response.setMessage("Success");
-		} catch(GameException e) {
+		} catch (UsernameNotFoundException e) {
 			response.setMessage(e.getMessage());
-		} catch (Exception e) {
-			response.setMessage("Failed to join game ".concat(gameJoinRequestModel.getGameId().toString()).concat(" Please try again"));
+		} catch (GameException e) {
+			response.setMessage(e.getMessage());
+		}
+        
+        return new ResponseEntity<>(response, responseHeaders, HttpStatus.OK);
+    }
+    
+    @RequestMapping(value = "/leave", method = RequestMethod.POST)
+    public ResponseEntity<?> leaveGame(@RequestBody GameRequestModel gameRequestModel) {
+    	HttpHeaders responseHeaders = new HttpHeaders();
+    	ResponseModel response = new ResponseModel();
+    	response.setActionSuccessful(false);
+    	
+    	String loggedInUser = customUserDetailsService.getLoggedInUser().getUsername();
+    	
+		try {
+			gameService.leaveGame(loggedInUser, gameRequestModel.getGameId());
+			
+			response.setActionSuccessful(true);
+			response.setMessage("Success");
+		} catch (UsernameNotFoundException e) {
+			response.setMessage(e.getMessage());
+		} catch (GameException e) {
+			response.setMessage(e.getMessage());
 		}
         
         return new ResponseEntity<>(response, responseHeaders, HttpStatus.OK);
@@ -91,16 +117,15 @@ public class GameController {
     	HttpHeaders responseHeaders = new HttpHeaders();
 		GetGamesResponseModel response = new GetGamesResponseModel();
 		response.setActionSuccessful(false);
+		
+		List<Game> games = gameService.getOpenGames();
     	
-		try {
-			List<Game> games = gameService.getOpenGames();
-			
+		if(games != null && !games.isEmpty()) {
 			response.setGames(games);
-			response.setActionSuccessful(true);
-			response.setMessage("Success");
-		} catch (Exception e) {
-			response.setMessage("Failed to retrieve available games.");
 		}
+		
+		response.setActionSuccessful(true);
+		response.setMessage("Success");
         
         return new ResponseEntity<>(response, responseHeaders, HttpStatus.OK);
     }
@@ -110,16 +135,15 @@ public class GameController {
     	HttpHeaders responseHeaders = new HttpHeaders();
 		GetGamesResponseModel response = new GetGamesResponseModel();
 		response.setActionSuccessful(false);
+		
+		List<Game> games = gameService.getAllGames();
     	
-		try {
-			List<Game> games = gameService.getAllGames();
-			
+		if(games != null && !games.isEmpty()) {
 			response.setGames(games);
-			response.setActionSuccessful(true);
-			response.setMessage("Success");
-		} catch (Exception e) {
-			response.setMessage("Failed to retrieve available games.");
 		}
+		
+		response.setActionSuccessful(true);
+		response.setMessage("Success");
         
         return new ResponseEntity<>(response, responseHeaders, HttpStatus.OK);
     }
@@ -142,11 +166,10 @@ public class GameController {
 			response.setGameState(game.getGameState());
 			response.setActionSuccessful(true);
 			response.setMessage("Success");
-		} catch(GameException e) {
+		} catch (UsernameNotFoundException e) {
 			response.setMessage(e.getMessage());
-		} catch (Exception e) {
-			e.printStackTrace();
-			response.setMessage("Failed to make a move. Please try again");
+		} catch (GameException e) {
+			response.setMessage(e.getMessage());
 		}
         
         return new ResponseEntity<>(response, responseHeaders, HttpStatus.OK);

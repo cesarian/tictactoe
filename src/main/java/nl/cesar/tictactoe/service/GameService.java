@@ -8,11 +8,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import nl.cesar.tictactoe.data.transfer.model.request.GameJoinRequestModel;
 import nl.cesar.tictactoe.data.transfer.model.request.MoveRequestModel;
 import nl.cesar.tictactoe.domain.Game;
 import nl.cesar.tictactoe.domain.Player;
+import nl.cesar.tictactoe.game.GameError;
 import nl.cesar.tictactoe.game.GameLogic;
+import nl.cesar.tictactoe.game.GameValidation;
 import nl.cesar.tictactoe.repository.GameRepository;
 import nl.cesar.tictactoe.repository.PlayerRepository;
 import nl.cesar.tictactoe.service.exception.GameException;
@@ -33,63 +34,23 @@ public class GameService {
 	private MoveUtil moveUtil;
 	
 	@Autowired
-	GameLogic gameLogic;
+	private GameLogic gameLogic;
+	
+	@Autowired
+	private GameValidation gameValidation;
 	
 	private Player getLoggedInPlayer(String loggedInUser) throws UsernameNotFoundException{
 		Optional<Player> loggedInPlayer = playerRepository.findByUsername(loggedInUser);
-		loggedInPlayer.orElseThrow(() -> new UsernameNotFoundException("User not found: " + loggedInUser));
+		loggedInPlayer.orElseThrow(() -> new UsernameNotFoundException(GameError.USER_NOT_FOUND + " Username: " + loggedInUser));
 		
 		return loggedInPlayer.get();
 	}
-
-	public Game createNewGame(String loggedInUser) throws UsernameNotFoundException, Exception {
-		Player loggedInPlayer;
-		
-		try {
-			loggedInPlayer = getLoggedInPlayer(loggedInUser);
-		} catch (UsernameNotFoundException e) {
-			throw e;
-		}
-		
-		Game game = new Game(loggedInPlayer.getId());
-		
-		try {
-			gameRepository.save(game);
-		} catch(Exception e) {
-			throw e;
-		}
-		
-		return game;
-	}
 	
-	public Game joinGame(String loggedInUser, GameJoinRequestModel gameJoinRequestModel) throws GameException, Exception {
-		Player loggedInPlayer;
+	private Game getGame(Long gameId) throws GameException {
+		Optional<Game> game = gameRepository.findById(gameId);
+		game.orElseThrow(() -> new GameException(GameError.GAME_NOT_FOUND + " Game ID: " + gameId));
 		
-		try {
-			loggedInPlayer = getLoggedInPlayer(loggedInUser);
-		} catch (UsernameNotFoundException e) {
-			throw e;
-		}
-		
-		Optional<Game> game = gameRepository.findById(gameJoinRequestModel.getGameId());
-		game.orElseThrow(() -> new Exception("Game not found " + gameJoinRequestModel.getGameId()));
-		
-		Game g = game.get();
-		
-		if(g.getPlayer1Id() == loggedInPlayer.getId() || g.getPlayer2Id() == loggedInPlayer.getId()) {
-			throw new GameException("Invalid action. Player already joined the game.");
-		}
-		
-		g.setPlayer2Id(loggedInPlayer.getId());
-		g.setGameState(GameState.INPROGRESS);
-		
-		try {
-			gameRepository.save(g);
-		} catch(Exception e) {
-			throw e;
-		}
-		
-		return g;
+		return game.get();
 	}
 	
 	public List<Game> getOpenGames() {
@@ -99,65 +60,106 @@ public class GameService {
 	
 	public List<Game> getAllGames() {
 		return gameRepository.findAll();
-	}	
-	
-	public Game makeMove(String loggedInUser, MoveRequestModel moveRequestModel) throws GameException, Exception{
+	}
+
+	public Game createNewGame(String loggedInUser) throws UsernameNotFoundException, GameException {
 		Player loggedInPlayer;
+		Game game;
 		
 		try {
 			loggedInPlayer = getLoggedInPlayer(loggedInUser);
+			game = new Game(loggedInPlayer.getId());
+			
+			gameRepository.save(game);
 		} catch (UsernameNotFoundException e) {
 			throw e;
-		}
-		
-		Optional<Game> game = gameRepository.findById(moveRequestModel.getGameId());
-		game.orElseThrow(() -> new Exception("Game not found " + moveRequestModel.getGameId()));
-		
-		Game g = game.get();
-		
-		try {
-			validateMove(g, moveRequestModel, loggedInPlayer);
-		} catch(GameException e) {
-			throw e;
-		}
-		
-		gameLogic.setGame(g);
-		moveUtil.setSymbolInPosition(g, moveRequestModel.getPosition(), moveRequestModel.getSymbol());
-		gameLogic.updateGameStateAfterMove(moveRequestModel, loggedInPlayer);
-		
-		try {
-			gameRepository.save(g);
 		} catch(Exception e) {
-			throw e;
+			throw new GameException(e.getMessage(), e);
 		}
 		
-		return g;
+		return game;
 	}
 	
-	private void validateMove(Game g, MoveRequestModel moveRequestModel, Player loggedInPlayer) throws GameException {
-		if(g.getGameState() != GameState.OPEN) {
-			throw new GameException("Invalid action. Waiting for another player to join.");
+	public Game joinGame(String loggedInUser, Long gameId) throws UsernameNotFoundException, GameException{
+		Player loggedInPlayer;
+		Game game;
+		
+		try {
+			loggedInPlayer = getLoggedInPlayer(loggedInUser);
+			game = getGame(gameId);
+			
+			String errorMessage = gameValidation.validateJoinGame(game, loggedInPlayer);
+			
+			if(errorMessage != null) {
+				throw new GameException(errorMessage);
+			}
+			
+			game.setPlayer2Id(loggedInPlayer.getId());
+			game.setGameState(GameState.INPROGRESS);
+			
+			gameRepository.save(game);
+		} catch (UsernameNotFoundException e) {
+			throw e;
+		} catch (GameException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new GameException(e.getMessage(), e);
 		}
 		
-		if(g.getGameState() != GameState.INPROGRESS) {
-			throw new GameException("Invalid action. Game is either finished or expired.");
+		return game;
+	}
+	
+	public void leaveGame(String loggedInUser, Long gameId) throws UsernameNotFoundException, GameException {
+		Player loggedInPlayer;
+		Game game;
+		
+		try {
+			loggedInPlayer = getLoggedInPlayer(loggedInUser);
+			game = getGame(gameId);
+			
+			String errorMessage = gameValidation.validateLeaveGame(game, loggedInPlayer);
+			
+			if(errorMessage != null) {
+				throw new GameException(errorMessage);
+			}
+			
+			gameLogic.updateGameStateAfterPlayerLeave(game, loggedInPlayer);
+			
+			gameRepository.save(game);
+		} catch (UsernameNotFoundException e) {
+			throw e;
+		} catch (GameException e) {
+			throw e;
+		}
+	}	
+	
+	public Game makeMove(String loggedInUser, MoveRequestModel moveRequestModel) throws UsernameNotFoundException, GameException {
+		Player loggedInPlayer;
+		Game game;
+		
+		try {
+			loggedInPlayer = getLoggedInPlayer(loggedInUser);
+			game = getGame(moveRequestModel.getGameId());
+			
+			String errorMessage = gameValidation.validateMove(game, moveRequestModel, loggedInPlayer);
+			
+			if(errorMessage != null) {
+				throw new GameException(errorMessage);
+			}
+			
+			moveUtil.setSymbolInPosition(game, moveRequestModel.getPosition(), moveRequestModel.getSymbol());
+			gameLogic.updateGameStateAfterMove(game, moveRequestModel, loggedInPlayer);
+			
+			gameRepository.save(game);
+		} catch (UsernameNotFoundException e) {
+			throw e;
+		} catch (GameException e) {
+			throw e;
+		} catch(Exception e) {
+			throw new GameException(e.getMessage(), e);
 		}
 		
-		if(g.getPlayerTurn() != loggedInPlayer.getId()) {
-			throw new GameException("It's not your turn. Please Wait.");
-		}
-		
-		if(g.getPlayer1Id() == loggedInPlayer.getId() && moveRequestModel.getSymbol() != g.getGameData().getPlayer1Symbol()) {
-			throw new GameException("Invalid move. Wrong Symbol for this player");
-		}
-		
-		if(g.getPlayer2Id() == loggedInPlayer.getId() && moveRequestModel.getSymbol() != g.getGameData().getPlayer2Symbol()) {
-			throw new GameException("Invalid move. Wrong Symbol for this player");
-		}
-		
-		if(moveUtil.getSymbolInPosition(g, moveRequestModel.getPosition()) != null){
-			throw new GameException("Invalid move. Position is already filled in.");
-		}
+		return game;
 	}
 
 }
