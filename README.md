@@ -78,6 +78,18 @@ Example request:
 
 -------------------------------------------------------------------------
 
+Leave a game (POST)
+
+URL: http://localhost:8080/game/leave
+
+Example request: 
+
+{
+	"gameId": 43
+}
+
+-------------------------------------------------------------------------
+
 Make a move (POST)
 
 URL: http://localhost:8080/game/move
