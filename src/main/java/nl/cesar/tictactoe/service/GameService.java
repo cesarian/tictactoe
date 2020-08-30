@@ -148,7 +148,7 @@ public class GameService {
 			}
 			
 			moveUtil.setSymbolInPosition(game, moveRequestModel.getPosition(), moveRequestModel.getSymbol());
-			gameLogic.updateGameStateAfterMove(game, moveRequestModel, loggedInPlayer);
+			gameLogic.updateGameStateAfterMove(game, moveRequestModel.getPosition(), loggedInPlayer);
 			
 			gameRepository.save(game);
 		} catch (UsernameNotFoundException e) {

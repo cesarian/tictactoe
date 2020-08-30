@@ -5,7 +5,6 @@ import java.util.stream.IntStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import nl.cesar.tictactoe.data.transfer.model.request.MoveRequestModel;
 import nl.cesar.tictactoe.domain.Game;
 import nl.cesar.tictactoe.domain.Player;
 import nl.cesar.tictactoe.util.GameState;
@@ -18,6 +17,10 @@ public class GameLogic {
 	
 	@Autowired
 	private MoveUtil moveUtil;
+	
+	public GameLogic(MoveUtil moveUtil) {
+		this.moveUtil = moveUtil;
+	}
 	
 	private Boolean checkWinningPattern(Game game, int position, int[] pattern) {
 		Character symbol = moveUtil.getSymbolInPosition(game, position);
@@ -40,6 +43,11 @@ public class GameLogic {
 	}
 	
 	public Boolean checkWinningPatterns(Game game, int position) {
+		
+		if(position <= 0 || position > 9) {
+			return false;
+		}
+		
 		int i;
 		for (i = 0; i < winningPatterns.length; i++) {
 			
@@ -84,8 +92,8 @@ public class GameLogic {
 		return false;
 	}
 	
-	public void updateGameStateAfterMove(Game game, MoveRequestModel moveRequestModel, Player loggedInPlayer) {
-		if(checkWinningPatterns(game, moveRequestModel.getPosition())) {
+	public void updateGameStateAfterMove(Game game, int position, Player loggedInPlayer) {
+		if(checkWinningPatterns(game, position)) {
 			game.setGameState(GameState.FINISHED);
 			game.setWinnerId(loggedInPlayer.getId());
 		} else if(checkDraw(game)) {
@@ -104,7 +112,7 @@ public class GameLogic {
 		
 		if(loggedInPlayer.getId() ==  game.getPlayer1Id() && game.getPlayer2Id() != null) {
 			game.setWinnerId(game.getPlayer2Id());
-		} if(loggedInPlayer.getId() ==  game.getPlayer1Id() && game.getPlayer2Id() == null) {
+		} else if(loggedInPlayer.getId() ==  game.getPlayer1Id() && game.getPlayer2Id() == null) {
 			game.setGameState(GameState.EXPIRED);
 		} else {
 			game.setWinnerId(game.getPlayer1Id());
