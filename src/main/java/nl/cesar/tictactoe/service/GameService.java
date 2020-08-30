@@ -141,14 +141,17 @@ public class GameService {
 			loggedInPlayer = getLoggedInPlayer(loggedInUser);
 			game = getGame(moveRequestModel.getGameId());
 			
-			String errorMessage = gameValidation.validateMove(game, moveRequestModel, loggedInPlayer);
+			Character symbol = moveRequestModel.getSymbol();
+			int position = moveRequestModel.getPosition();
+			
+			String errorMessage = gameValidation.validateMove(game, symbol, position, loggedInPlayer);
 			
 			if(errorMessage != null) {
 				throw new GameException(errorMessage);
 			}
 			
-			moveUtil.setSymbolInPosition(game, moveRequestModel.getPosition(), moveRequestModel.getSymbol());
-			gameLogic.updateGameStateAfterMove(game, moveRequestModel.getPosition(), loggedInPlayer);
+			moveUtil.setSymbolInPosition(game, position, symbol);
+			gameLogic.updateGameStateAfterMove(game, position, loggedInPlayer);
 			
 			gameRepository.save(game);
 		} catch (UsernameNotFoundException e) {

@@ -3,7 +3,6 @@ package nl.cesar.tictactoe.game;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import nl.cesar.tictactoe.data.transfer.model.request.MoveRequestModel;
 import nl.cesar.tictactoe.domain.Game;
 import nl.cesar.tictactoe.domain.Player;
 import nl.cesar.tictactoe.util.GameState;
@@ -15,6 +14,14 @@ public class GameValidation {
 	@Autowired
 	private MoveUtil moveUtil;
 	
+	public GameValidation() {
+		// empty constructor
+	}
+	
+	public GameValidation(MoveUtil moveUtil) {
+		this.moveUtil = moveUtil;
+	}
+
 	public String validateJoinGame(Game game, Player loggedInPlayer) {
 		if(game.getPlayer1Id() == loggedInPlayer.getId() || game.getPlayer2Id() == loggedInPlayer.getId()) {
 			return GameError.ALREADY_JOINED;
@@ -33,12 +40,12 @@ public class GameValidation {
 		return null;
 	}
 	
-	public String validateMove(Game game, MoveRequestModel moveRequestModel, Player loggedInPlayer){
+	public String validateMove(Game game, Character symbol, int position, Player loggedInPlayer){
 		
 		Long playerId = loggedInPlayer.getId();
-		Character moveSymbol = moveRequestModel.getSymbol();
+		Character moveSymbol = symbol;
 		
-		if(game.getGameState() != GameState.OPEN) {
+		if(game.getGameState() == GameState.OPEN) {
 			return GameError.WAITING_PLAYER;
 		}
 		
@@ -58,7 +65,7 @@ public class GameValidation {
 			return GameError.WRONG_SYMBOL;
 		}
 		
-		if(moveUtil.getSymbolInPosition(game, moveRequestModel.getPosition()) != null){
+		if(moveUtil.getSymbolInPosition(game, position) != null){
 			return GameError.POSITION_FILLED;
 		}
 		
