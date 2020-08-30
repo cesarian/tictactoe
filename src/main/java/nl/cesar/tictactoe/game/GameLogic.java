@@ -5,7 +5,6 @@ import java.util.stream.IntStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import nl.cesar.tictactoe.data.transfer.model.request.MoveRequestModel;
 import nl.cesar.tictactoe.domain.Game;
 import nl.cesar.tictactoe.domain.Player;
 import nl.cesar.tictactoe.util.GameState;
@@ -16,16 +15,14 @@ public class GameLogic {
 	
 	private int[][] winningPatterns = {{1,2,3}, {4,5,6}, {7,8,9}, {1,4,7}, {2,5,8}, {3,6,9}, {1,5,9}, {3,5,7}};
 	
-	private Game game;
-	
 	@Autowired
 	private MoveUtil moveUtil;
 	
-	public void setGame(Game game) {
-		this.game = game;
-	};
+	public GameLogic(MoveUtil moveUtil) {
+		this.moveUtil = moveUtil;
+	}
 	
-	private Boolean checkWinningPattern(int position, int[] pattern) {
+	private Boolean checkWinningPattern(Game game, int position, int[] pattern) {
 		Character symbol = moveUtil.getSymbolInPosition(game, position);
 		
 		if(symbol != null) {
@@ -45,14 +42,19 @@ public class GameLogic {
 		return false;
 	}
 	
-	public Boolean checkWinningPatterns(int position) {
+	public Boolean checkWinningPatterns(Game game, int position) {
+		
+		if(position <= 0 || position > 9) {
+			return false;
+		}
+		
 		int i;
 		for (i = 0; i < winningPatterns.length; i++) {
 			
 			boolean contains = IntStream.of(winningPatterns[i]).anyMatch(x -> x == position);
 			
 			if(contains) {
-				if(checkWinningPattern(position, winningPatterns[i])) {
+				if(checkWinningPattern(game, position, winningPatterns[i])) {
 					return true;
 				}
 			}
@@ -61,7 +63,7 @@ public class GameLogic {
 		return false;
 	}
 
-	public Boolean checkDraw() {
+	public Boolean checkDraw(Game game) {
 		int i;
 		int has2DifferentFilledPositonsCount = 0;
 		for (i = 0; i < winningPatterns.length; i++) {
@@ -90,11 +92,11 @@ public class GameLogic {
 		return false;
 	}
 	
-	public void updateGameStateAfterMove(MoveRequestModel moveRequestModel, Player loggedInPlayer) {
-		if(checkWinningPatterns(moveRequestModel.getPosition())) {
+	public void updateGameStateAfterMove(Game game, int position, Player loggedInPlayer) {
+		if(checkWinningPatterns(game, position)) {
 			game.setGameState(GameState.FINISHED);
 			game.setWinnerId(loggedInPlayer.getId());
-		} else if(checkDraw()) {
+		} else if(checkDraw(game)) {
 			game.setGameState(GameState.DRAW);
 		} else {
 			if(loggedInPlayer.getId() == game.getPlayer1Id()) {
@@ -102,6 +104,18 @@ public class GameLogic {
 			} else {
 				game.setPlayerTurn(game.getPlayer1Id());
 			}
+		}
+	}
+	
+	public void updateGameStateAfterPlayerLeave(Game game, Player loggedInPlayer) {
+		game.setGameState(GameState.FINISHED);
+		
+		if(loggedInPlayer.getId() ==  game.getPlayer1Id() && game.getPlayer2Id() != null) {
+			game.setWinnerId(game.getPlayer2Id());
+		} else if(loggedInPlayer.getId() ==  game.getPlayer1Id() && game.getPlayer2Id() == null) {
+			game.setGameState(GameState.EXPIRED);
+		} else {
+			game.setWinnerId(game.getPlayer1Id());
 		}
 	}
 	

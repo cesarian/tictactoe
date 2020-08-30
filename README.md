@@ -78,6 +78,18 @@ Example request:
 
 -------------------------------------------------------------------------
 
+Leave a game (POST)
+
+URL: http://localhost:8080/game/leave
+
+Example request: 
+
+{
+	"gameId": 43
+}
+
+-------------------------------------------------------------------------
+
 Make a move (POST)
 
 URL: http://localhost:8080/game/move
@@ -94,7 +106,7 @@ Symbol is "x" for the game owner/starter (player 1) and "o" for the player that 
 
 Position
 
-Ther are 1 to 9 positions. Put a symbol in one of the positions. Position chema:
+There are 1 to 9 positions. Put a symbol in one of the positions. Position schema:
 
 1 2 3
 

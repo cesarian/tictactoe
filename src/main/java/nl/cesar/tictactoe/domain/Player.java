@@ -13,7 +13,11 @@ public class Player {
 	private String password;
 	
 	public Player() {
-
+		//empty constructor
+	}
+	
+	public Player(Long id) {
+		this.id = id;
 	}
 	
 	public Player(String username, String password) {
